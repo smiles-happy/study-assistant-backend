@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习数据统计</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+          background: #f4f6ff;
+        }
+        .sidebar {
+          width: 180px;
+          background: #4b5fd8;
+          height: 100vh;
+          position: fixed;
+          top: 0;
+          left: 0;
+          padding: 30px 15px;
+        }
+        .sidebar h3 {
+          color: #fff;
+          margin-bottom: 30px;
+          text-align: center;
+        }
+        .sidebar a {
+          display: block;
+          color: #fff;
+          text-decoration: none;
+          margin: 20px 0;
+          padding: 10px;
+          border-radius: 6px;
+        }
+        .sidebar a:hover {
+          background: rgba(255,255,255,0.2);
+        }
+        .main-box {
+          margin-left: 180px;
+          padding: 30px;
+        }
+        h2 {
+          text-align: center;
+          margin-bottom: 20px;
+          color: #333;
+        }
+
+
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <h3>学习助手菜单</h3>
+    <a href="task-list.html">📋 我的学习任务</a>
+    <a href="stat.html">📊 学习数据统计</a>
+    <a href="log.html">📜 系统操作日志</a>
+</div>
+<div class="main-box">
+    <h2>📊 学习数据统计分析</h2>
+
+    <!-- 顶部番茄钟 -->
+    <style>
+        .tomato-clock {
+            width: 95%;
+            margin: 0 auto 30px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 12px #e0e6ff;
+            text-align: center;
+        }
+        .tomato-time {
+            font-size: 60px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 15px 0;
+        }
+        .tomato-input {
+            width: 70%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+        .tomato-input:focus {
+            border-color: #4b5fd8;
+        }
+        .tomato-btn-group button {
+            padding: 10px 24px;
+            margin: 0 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #startBtn {
+            background: #27ae60;
+            color: white;
+        }
+        #pauseBtn {
+            background: #f39c12;
+            color: white;
+        }
+        #resetBtn {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
+    <div class="tomato-clock">
+        <h3>🍅 25分钟番茄学习闹钟</h3>
+        <input class="tomato-input" id="taskInput" placeholder="请输入本次要完成的学习任务，例如：高数刷题">
+        <div class="tomato-time" id="timeText">25:00</div>
+        <div class="tomato-btn-group">
+            <button id="startBtn">开始计时</button>
+            <button id="pauseBtn">暂停</button>
+            <button id="resetBtn">重置</button>
+        </div>
+    </div>
+
+    <!-- 三张功能卡片横向容器 -->
+    <style>
+        .card-row {
+            width: 95%;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+        }
+        .func-card {
+            flex: 1;
+            max-width: 320px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px 20px;
+            box-shadow: 0 2px 12px #e0e6ff;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .func-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 18px #d0d9ff;
+        }
+        .func-card h3 {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #222;
+        }
+        .func-card p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* 通用弹窗遮罩 */
+        .modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            z-index: 999;
+        }
+        .modal-wrap {
+            width: 80%;
+            max-width: 1000px;
+            background: #fff;
+            border-radius: 14px;
+            padding: 30px;
+            margin: 5vh auto;
+        }
+        .modal-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-top h3 {
+            margin:0;
+            font-size:24px;
+        }
+        .close-modal {
+            width:36px;
+            height:36px;
+            border:none;
+            border-radius:50%;
+            font-size:20px;
+            cursor:pointer;
+            background:#eee;
+        }
+
+        /* 图表弹窗容器 */
+        .chart-box {
+            width:100%;
+            height:420px;
+        }
+
+        /* 日记弹窗样式 */
+        .diary-title {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        .diary-content {
+            width: 100%;
+            height: 160px;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+            outline: none;
+        }
+        #saveDiaryBtn {
+            padding: 10px 30px;
+            background: #4b5fd8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top:15px;
+        }
+        .diary-list {
+            margin-top: 30px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .diary-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+        .diary-item h4 {
+            color: #222;
+            margin:0 0 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .diary-item p {
+            color: #555;
+            line-height: 1.6;
+            margin:0;
+        }
+        .diary-time {
+            font-size: 13px;
+            color: #999;
+        }
+    </style>
+
+    <div class="card-row">
+        <!-- 卡片1：每周学习时长 -->
+        <div class="func-card" id="openBarModal">
+            <h3>📊 每周学习时长</h3>
+            <p>点击查看每周学习柱状图</p>
+        </div>
+        <!-- 卡片2：任务分类占比 -->
+        <div class="func-card" id="openPieModal">
+            <h3>🥧 任务分类占比</h3>
+            <p>点击查看任务饼图分析</p>
+        </div>
+        <!-- 卡片3：学习日记 -->
+        <div class="func-card" id="openDiaryModal">
+            <h3>📔 学习日记</h3>
+            <p>点击记录每日学习心得</p>
+        </div>
+    </div>
+
+    <!-- 弹窗1：每周时长柱状图 -->
+    <div class="modal-mask" id="barMask">
+        <div class="modal-wrap">
+            <div class="modal-top">
+                <h3>每周学习时长（分钟）</h3>
+                <button class="close-modal" data-mask="barMask">×</button>
+            </div>
+            <div class="chart-box" id="barChart"></div>
+        </div>
+    </div>
+
+    <!-- 弹窗2：任务占比饼图 -->
+    <div class="modal-mask" id="pieMask">
+        <div class="modal-wrap">
+            <div class="modal-top">
+                <h3>任务分类占比</h3>
+                <button class="close-modal" data-mask="pieMask">×</button>
+            </div>
+            <div class="chart-box" id="pieChart"></div>
+        </div>
+    </div>
+
+    <!-- 弹窗3：学习日记 -->
+    <div class="modal-mask" id="diaryMask">
+        <div class="modal-wrap">
+            <div class="modal-top">
+                <h3>📔 我的学习日记</h3>
+                <button class="close-modal" data-mask="diaryMask">×</button>
+            </div>
+            <input class="diary-title" id="diaryTitle" placeholder="日记标题，例如：今日高数复习总结">
+            <textarea class="diary-content" id="diaryContent" placeholder="写下今天的学习心得、遇到的难题、明日计划..."></textarea>
+            <button id="saveDiaryBtn">保存日记</button>
+            <div class="diary-list" id="diaryList"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 自动拼接user_id的JS，固定放在这里 -->
+<script>
+    // 1. 侧边栏自动拼接user_id
+ const urlParams = new URLSearchParams(window.location.search);
+ const uid = urlParams.get('user_id');
+ document.querySelectorAll('.sidebar a').forEach(a => {
+   const baseHref = a.getAttribute('href');
+   a.href = `${baseHref}?user_id=${uid}`;
+ })
+
+ // 2. 番茄钟逻辑
+ let totalSeconds = 25 * 60;
+ let timer = null;
+ let isRunning = false;
+ const timeText = document.getElementById("timeText");
+ const startBtn = document.getElementById("startBtn");
+ const pauseBtn = document.getElementById("pauseBtn");
+ const resetBtn = document.getElementById("resetBtn");
+ const taskInput = document.getElementById("taskInput");
+ function formatTime(s) {
+     let m = Math.floor(s / 60);
+     let sec = s % 60;
+     return String(m).padStart(2, '0') + ":" + String(sec).padStart(2, '0');
+ }
+ startBtn.onclick = function () {
+     if (isRunning) return;
+     const taskName = taskInput.value.trim();
+     if (!taskName) {
+         alert("请先填写本次学习任务！");
+         return;
+     }
+     isRunning = true;
+     timer = setInterval(() => {
+         totalSeconds--;
+         timeText.innerText = formatTime(totalSeconds);
+         if (totalSeconds <= 0) {
+             clearInterval(timer);
+             isRunning = false;
+             alert(`🍅 25分钟学习结束！\n本次任务：${taskName}\n可以休息一下啦！`);
+             totalSeconds = 25 * 60;
+             timeText.innerText = formatTime(totalSeconds);
+         }
+     }, 1000);
+ }
+ pauseBtn.onclick = function () {
+     clearInterval(timer);
+     isRunning = false;
+ }
+ resetBtn.onclick = function () {
+     clearInterval(timer);
+     isRunning = false;
+     totalSeconds = 25 * 60;
+     timeText.innerText = formatTime(totalSeconds);
+ }
+
+ // 3. 通用弹窗关闭逻辑
+ document.querySelectorAll('.close-modal').forEach(btn=>{
+     btn.onclick = function(){
+         const maskId = this.dataset.mask;
+         document.getElementById(maskId).style.display = "none";
+     }
+ })
+ // 点击遮罩空白关闭弹窗
+ document.querySelectorAll('.modal-mask').forEach(mask=>{
+     mask.onclick = function(e){
+         if(e.target === this) this.style.display = "none";
+     }
+ })
+
+ // 4. 柱状图弹窗打开
+ document.getElementById('openBarModal').onclick = function(){
+     document.getElementById('barMask').style.display = "block";
+     renderBarChart();
+ }
+ // 饼图弹窗打开
+ document.getElementById('openPieModal').onclick = function(){
+     document.getElementById('pieMask').style.display = "block";
+     renderPieChart();
+ }
+ // 日记弹窗打开
+ document.getElementById('openDiaryModal').onclick = function(){
+     document.getElementById('diaryMask').style.display = "block";
+     renderDiary(uid);
+ }
+
+ // 5. ECharts图表渲染函数
+ function renderBarChart(){
+     let barDom = document.getElementById("barChart");
+     let barChart = echarts.init(barDom);
+     let barOption = {
+       title:{text:"每周学习时长（分钟）"},
+       xAxis:{data:["周一","周二","周三","周四","周五","周六","周日"]},
+       yAxis:{},
+       series:[{type:"bar",data:[60,90,45,120,70,150,80]}]
+     };
+     barChart.setOption(barOption);
+     window.addEventListener("resize",()=>barChart.resize());
+ }
+ function renderPieChart(){
+     let pieDom = document.getElementById("pieChart");
+     let pieChart = echarts.init(pieDom);
+     let pieOption = {
+       title:{text:"任务分类占比"},
+       series:[{
+         type:"pie",
+         radius:"50%",
+         data:[
+           {name:"课程作业",value:8},
+           {name:"复习备考",value:6},
+           {name:"课程设计",value:3},
+           {name:"竞赛准备",value:2}
+         ]
+       }]
+     };
+     pieChart.setOption(pieOption);
+     window.addEventListener("resize",()=>pieChart.resize());
+ }
+
+ // 6. 日记本地存储逻辑
+ function getNowTime() {
+     const date = new Date();
+     return date.getFullYear() + "-" + String(date.getMonth()+1).padStart(2,'0') + "-" + String(date.getDate()).padStart(2,'0') + " "
+         + String(date.getHours()).padStart(2,'0') + ":" + String(date.getMinutes()).padStart(2,'0');
+ }
+ function getDiaryList(userId) {
+     const key = "diary_" + userId;
+     let str = localStorage.getItem(key);
+     return str ? JSON.parse(str) : [];
+ }
+ function renderDiary(userId) {
+     const list = getDiaryList(userId);
+     const wrap = document.getElementById("diaryList");
+     wrap.innerHTML = "";
+     if(list.length === 0) {
+         wrap.innerHTML = "<p style='text-align:center;color:#999;'>暂无日记，快来记录今日学习吧</p>";
+         return;
+     }
+     list.reverse().forEach(item => {
+         const div = document.createElement("div");
+         div.className = "diary-item";
+         div.innerHTML = `
+             <h4>${item.title} <span class="diary-time">${item.time}</span></h4>
+             <p>${item.content}</p>
+         `;
+         wrap.appendChild(div);
+     })
+ }
+ document.getElementById("saveDiaryBtn").onclick = function() {
+     const title = document.getElementById("diaryTitle").value.trim();
+     const content = document.getElementById("diaryContent").value.trim();
+     if(!title) {
+         alert("请填写日记标题！");
+         return;
+     }
+     if(!content) {
+         alert("请填写日记内容！");
+         return;
+     }
+     const diaryList = getDiaryList(uid);
+     diaryList.push({title, content, time: getNowTime()});
+     localStorage.setItem("diary_" + uid, JSON.stringify(diaryList));
+     document.getElementById("diaryTitle").value = "";
+     document.getElementById("diaryContent").value = "";
+     alert("日记保存成功！");
+     renderDiary(uid);
+ }
+</script>
+</body>
+</html>
