@@ -419,10 +419,47 @@
 .btn-danger:hover {
     background: #c82333;
 }
+        /* 侧边导航栏样式 */
+.sidebar {
+  width: 180px;
+  background: #4b5fd8;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 30px 15px;
+}
+.sidebar h3 {
+  color: #fff;
+  margin-bottom: 30px;
+  text-align: center;
+}
+.sidebar a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  margin: 20px 0;
+  padding: 10px;
+  border-radius: 6px;
+}
+.sidebar a:hover {
+  background: rgba(255,255,255,0.2);
+}
+.main-box {
+  margin-left: 180px;
+  padding: 30px;
+}
+        
     </style>
 </head>
 <body>
-
+<div class="sidebar">
+    <h3>学习助手菜单</h3>
+    <a href="task-list.html">📋 我的学习任务</a>
+    <a href="stat.html">📊 学习数据统计</a>
+    <a href="log.html">📜 系统操作日志</a>
+</div>
+    <div class="main-box">
 <div class="container">
     <div class="header">
         <a class="back" href="index.html">← 返回首页</a>
@@ -950,6 +987,7 @@ function saveProfile() {
         if (profileModal && event.target === profileModal) closeProfileModal();
     };
 </script>
+        </div>
 </body>
 </html>
 </body>
