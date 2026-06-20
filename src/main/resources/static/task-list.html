@@ -419,7 +419,7 @@
 .btn-danger:hover {
     background: #c82333;
 }
-        /* 侧边导航栏样式 */
+        /* 侧边导航样式 */
 .sidebar {
   width: 180px;
   background: #4b5fd8;
@@ -443,23 +443,30 @@
   border-radius: 6px;
 }
 .sidebar a:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,0.2);
 }
 .main-box {
   margin-left: 180px;
-  padding: 30px;
+  padding: 20px;
+  min-height: 100vh;
 }
-        
+        .main-box h1 {
+  text-align: center;
+  font-size: 36px;
+  margin: 20px 0;
+  writing-mode: horizontal-tb !important; /* 强制横向文字 */
+}
     </style>
 </head>
 <body>
+<!-- 侧边导航栏 -->
 <div class="sidebar">
     <h3>学习助手菜单</h3>
     <a href="task-list.html">📋 我的学习任务</a>
     <a href="stat.html">📊 学习数据统计</a>
     <a href="log.html">📜 系统操作日志</a>
 </div>
-    <div class="main-box">
+<div class="main-box">
 <div class="container">
     <div class="header">
         <a class="back" href="index.html">← 返回首页</a>
@@ -598,6 +605,7 @@
         </div>
     </div>
 </div>
+
 <script>
     let allTasks = [];
     const categoryMap = {1:"作业",2:"复习",3:"预习",4:"实验",5:"考试",6:"项目"};
@@ -986,8 +994,15 @@ function saveProfile() {
         const profileModal = document.getElementById("profileModal");
         if (profileModal && event.target === profileModal) closeProfileModal();
     };
+    // 获取地址栏的user_id数字
+const urlParams = new URLSearchParams(window.location.search);
+const uid = urlParams.get('user_id');
+// 给侧边所有菜单自动拼接user_id参数
+document.querySelectorAll('.sidebar a').forEach(a => {
+  const baseHref = a.getAttribute('href');
+  a.href = `${baseHref}?user_id=${uid}`;
+})
 </script>
-        </div>
 </body>
 </html>
 </body>
